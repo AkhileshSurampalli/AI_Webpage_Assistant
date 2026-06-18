@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Page Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 380px;
+      min-height: 480px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e40af, #0e7490);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon { font-size: 20px; }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      color: #bfdbfe;
+      margin-top: 2px;
+    }
+
+    .section {
+      padding: 14px 16px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .summary-box {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      min-height: 60px;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #334155;
+      border-top-color: #0e7490;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .word-count {
+      font-size: 10px;
+      color: #475569;
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .qa-section { padding: 14px 16px; }
+
+    .chat-history {
+      max-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 95%;
+    }
+
+    .message.user {
+      background: #1e40af;
+      color: #dbeafe;
+      align-self: flex-end;
+    }
+
+    .message.agent {
+      background: #1e293b;
+      color: #cbd5e1;
+      align-self: flex-start;
+    }
+
+    .message.agent .tool-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: #0e7490;
+      color: white;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .question-input {
+      flex: 1;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: #e2e8f0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .question-input:focus { border-color: #0e7490; }
+    .question-input::placeholder { color: #475569; }
+
+    .ask-btn {
+      background: #0e7490;
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .ask-btn:hover { background: #0891b2; }
+    .ask-btn:disabled { background: #334155; cursor: not-allowed; }
+
+    .error-box {
+      background: #450a0a;
+      border: 1px solid #991b1b;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #fca5a5;
+      margin: 8px 16px;
+    }
+
+    .footer {
+      padding: 8px 16px;
+      font-size: 10px;
+      color: #334155;
+      text-align: center;
+      border-top: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-icon">🤖</span>
+    <div>
+      <div class="header-title">AI Page Assistant</div>
+      <div class="header-subtitle" id="page-url">Loading page...</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Page Summary</div>
+    <div class="summary-box" id="summary-box">
+      <div class="loading">
+        <div class="spinner"></div>
+        Summarising this page...
+      </div>
+    </div>
+    <div class="word-count" id="word-count"></div>
+  </div>
+
+  <div id="error-container"></div>
+
+  <div class="qa-section">
+    <div class="section-label">Ask a Question</div>
+    <div class="chat-history" id="chat-history"></div>
+    <div class="input-row">
+      <input
+        type="text"
+        class="question-input"
+        id="question-input"
+        placeholder="Ask anything about this page..."
+        disabled
+      />
+      <button class="ask-btn" id="ask-btn" disabled>➤</button>
+    </div>
+  </div>
+
+  <div class="footer">Powered by RAG · OpenAI · LangChain · FastAPI</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
