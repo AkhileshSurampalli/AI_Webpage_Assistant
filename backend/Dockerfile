@@ -1,5 +1,5 @@
 # A slim Python base image to keep the container small
-FROM python:3.11-slim
+FROM public.ecr.aws/docker/library/python:3.11-slim
 
 # Set working directory inside the container
 WORKDIR /app
@@ -20,4 +20,4 @@ RUN useradd -m appuser
 USER appuser
 
 # Command to run when the container starts
-CMD ['uvicorn', 'main:app', '--host', "0.0.0.0", '--port', '8000']
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

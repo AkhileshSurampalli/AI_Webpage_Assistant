@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
@@ -83,9 +84,26 @@ def get_llm():
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured.")
     return ChatOpenAI(model='gpt-4o-mini', temperature=0.5, api_key=api_key)
 
+# def get_embeddings():
+#     api_key = os.getenv("OPENAI_API_KEY")
+#     return OpenAIEmbeddings(api_key=api_key)
+
+_embeddings_instance = None
+
 def get_embeddings():
-    api_key = os.getenv("OPENAI_API_KEY")
-    return OpenAIEmbeddings(api_key=api_key)
+     """
+    Returns a local HuggingFace embedding model — runs entirely on your
+    machine, no API calls, no external downloads after the first run
+    (model is cached locally in ~/.cache/huggingface).
+    Cached as a singleton so the model loads only once, not per-request.
+    """
+     global _embeddings_instance
+     if _embeddings_instance is None:
+         _embeddings_instance = HuggingFaceEmbeddings(
+             model_name = "sentence-transformers/all-MiniLM-L6-v2"
+         )
+         return _embeddings_instance
+
 
 def build_vector_store(text: str, page_hash: str) -> FAISS:
     """Chunk text and build a FAISS vector store. Cache by page hash."""
