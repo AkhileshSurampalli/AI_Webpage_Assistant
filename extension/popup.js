@@ -1,5 +1,5 @@
 // popup.js — handles UI logic, communicates with FastAPI backend
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://184.73.134.39:8000";
 
 const summaryBox = document.getElementById("summary-box");
 const wordCount = document.getElementById("word-count");
